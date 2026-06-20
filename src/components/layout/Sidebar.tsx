@@ -52,17 +52,15 @@ export default function Sidebar({ session }: { session: UserSession }) {
   return (
     <aside className={`relative flex flex-col border-r border-[var(--border)] transition-all duration-300 ${collapsed ? 'w-[68px]' : 'w-64'}`}
       style={{ background: 'linear-gradient(180deg, #150c2a 0%, #0b0716 100%)' }}>
-      {/* Header */}
-      <div className="h-14 px-3 border-b border-[var(--border)] flex items-center justify-between gap-2 flex-shrink-0">
+      {/* Header — full light panel with the brand logo in its original colours */}
+      <div className="h-14 px-3 flex items-center justify-between gap-2 flex-shrink-0 shadow-sm" style={{ background: 'var(--brand-light)' }}>
         {!collapsed
-          ? <div className="rounded-xl px-3 py-1.5 shadow-sm" style={{ background: 'var(--brand-light)' }}>
-              <img src="/logo.png" alt="Invollve" className="h-6 object-contain" />
-            </div>
-          : <div className="w-9 h-9 mx-auto rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'var(--grad)' }}>
+          ? <img src="/logo.png" alt="Invollve" className="h-6 object-contain" />
+          : <div className="w-9 h-9 mx-auto rounded-xl flex items-center justify-center shadow-md" style={{ background: 'var(--grad)' }}>
               <span className="text-white text-sm font-black">I</span>
             </div>}
         <button onClick={() => setCollapsed(c => !c)}
-          className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-[var(--muted)] hover:text-white hover:bg-white/10 transition-all"
+          className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-[var(--brand-deep)] hover:bg-black/10 transition-all"
           title={collapsed ? 'Expandir menu' : 'Recolher menu'}>
           <Chevron dir={collapsed ? 'right' : 'left'} />
         </button>

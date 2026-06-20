@@ -95,64 +95,75 @@ export default function MeetingRoom({ session, avatarColor, onLeave }: { session
       </div>
 
       {/* top-down room stage */}
-      <div className="relative z-10 flex-1 mx-auto w-full max-w-[1180px]">
-        {/* rug defining the seating area */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[60px]"
-          style={{ width: '82%', height: '88%', background: 'radial-gradient(130% 130% at 50% 45%, #e4e0d7, #d2cdc2)', boxShadow: 'inset 0 0 60px rgba(0,0,0,0.04)' }} />
+      <div className="relative z-10 flex-1 mx-auto w-full max-w-[1180px] overflow-hidden">
+        {/* The room (rug + table + chairs). When a screen is shared the whole room
+            zooms in a touch so the shared screen — and the cameras around it — get
+            bigger and easier to read. Chairs move with the zoom, cameras follow. */}
+        <div className="absolute inset-0 transition-transform duration-500 ease-out"
+          style={{ transform: sharer ? 'scale(1.16)' : 'scale(1)', transformOrigin: '50% 49%' }}>
+          {/* rug defining the seating area */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[60px]"
+            style={{ width: '82%', height: '88%', background: 'radial-gradient(130% 130% at 50% 45%, #e4e0d7, #d2cdc2)', boxShadow: 'inset 0 0 60px rgba(0,0,0,0.04)' }} />
 
-        {/* the table */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[44px]"
-          style={{ width: '46%', height: '48%', background: 'linear-gradient(160deg,#c2a984 0%,#a98e66 60%,#977c54 100%)', boxShadow: '0 30px 60px rgba(60,45,25,0.35), inset 0 2px 0 rgba(255,255,255,0.25)' }}>
-          <div className="absolute inset-[10px] rounded-[34px]" style={{ boxShadow: 'inset 0 0 40px rgba(120,90,50,0.35)' }} />
+          {/* the table */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[44px]"
+            style={{ width: '46%', height: '48%', background: 'linear-gradient(160deg,#c2a984 0%,#a98e66 60%,#977c54 100%)', boxShadow: '0 30px 60px rgba(60,45,25,0.35), inset 0 2px 0 rgba(255,255,255,0.25)' }}>
+            <div className="absolute inset-[10px] rounded-[34px]" style={{ boxShadow: 'inset 0 0 40px rgba(120,90,50,0.35)' }} />
 
-          {/* shared screen, large, in the middle of the table */}
-          {sharer && (
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl overflow-hidden bg-black shadow-2xl ring-1 ring-black/40"
-              style={{ width: '78%', height: '74%' }}>
-              {sharer.id === meId
-                ? <SelfView mirror={false} className="w-full h-full object-contain bg-black" />
-                : <RemoteVideo id={sharer.id} className="w-full h-full object-contain bg-black" />}
-              <span className="absolute bottom-1.5 left-1.5 text-[11px] text-white bg-black/60 px-2 py-0.5 rounded">
-                🖥️ Tela de {sharer.name.split(' ')[0]}
-              </span>
-            </div>
-          )}
+            {/* shared screen, large, in the middle of the table */}
+            {sharer && (
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl overflow-hidden bg-black shadow-2xl ring-1 ring-black/40"
+                style={{ width: '83%', height: '80%' }}>
+                {sharer.id === meId
+                  ? <SelfView mirror={false} className="w-full h-full object-contain bg-black" />
+                  : <RemoteVideo id={sharer.id} className="w-full h-full object-contain bg-black" />}
+                <span className="absolute bottom-1.5 left-1.5 text-[11px] text-white bg-black/60 px-2 py-0.5 rounded">
+                  🖥️ Tela de {sharer.name.split(' ')[0]}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* chairs + participant bubbles around the table */}
+          {SEATS.map((seat, i) => {
+            const p = bySeat.get(i)
+            const isMe = p?.id === meId
+            const color = p ? (p.avatarColor ?? ROLE_SHIRT[p.role] ?? '#7a8290') : ''
+            // Show the seat's camera only when it's a real camera (not while that
+            // person is screen-sharing — their screen goes to the centre instead).
+            const seatVideo = p && !p.screen && (isMe ? (camOn && !screenOn) : true)
+            return (
+              <div key={i} className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5"
+                style={{ left: `${seat.x}%`, top: `${seat.y}%` }}>
+                <Chair out={seat.out} dim={!p}>
+                  {p && (
+                    <div className="relative w-[92px] h-[92px] rounded-full overflow-hidden ring-2 ring-white/70 shadow-lg">
+                      <div className="absolute inset-0 flex items-center justify-center"
+                        style={{ background: `radial-gradient(circle at 50% 38%, ${color}, ${color}bb 70%)` }}>
+                        <span className="text-2xl font-bold text-white drop-shadow">{initialsOf(p.name)}</span>
+                      </div>
+                      {seatVideo && (isMe
+                        ? <SelfView className="absolute inset-0 w-full h-full object-cover" />
+                        : <RemoteVideo id={p.id} className="absolute inset-0 w-full h-full object-cover" />)}
+                      {p.hand && <span className="absolute -top-0.5 right-0.5 text-base drop-shadow">✋</span>}
+                    </div>
+                  )}
+                </Chair>
+                {p && (
+                  <span className="px-2 py-0.5 rounded-full bg-white/85 text-zinc-700 text-[11px] font-medium shadow flex items-center gap-1 whitespace-nowrap">
+                    {(isMe && !micOn) && <span title="Microfone desligado">🔇</span>}
+                    {p.name.split(' ')[0]}{isMe ? ' (você)' : ''}
+                  </span>
+                )}
+              </div>
+            )
+          })}
         </div>
 
-        {/* chairs + participant bubbles around the table */}
-        {SEATS.map((seat, i) => {
-          const p = bySeat.get(i)
-          const isMe = p?.id === meId
-          const color = p ? (p.avatarColor ?? ROLE_SHIRT[p.role] ?? '#7a8290') : ''
-          // Show the seat's camera only when it's a real camera (not while that
-          // person is screen-sharing — their screen goes to the centre instead).
-          const seatVideo = p && !p.screen && (isMe ? (camOn && !screenOn) : true)
-          return (
-            <div key={i} className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5"
-              style={{ left: `${seat.x}%`, top: `${seat.y}%` }}>
-              <Chair out={seat.out} dim={!p}>
-                {p && (
-                  <div className="relative w-[92px] h-[92px] rounded-full overflow-hidden ring-2 ring-white/70 shadow-lg">
-                    <div className="absolute inset-0 flex items-center justify-center"
-                      style={{ background: `radial-gradient(circle at 50% 38%, ${color}, ${color}bb 70%)` }}>
-                      <span className="text-2xl font-bold text-white drop-shadow">{initialsOf(p.name)}</span>
-                    </div>
-                    {seatVideo && (isMe
-                      ? <SelfView className="absolute inset-0 w-full h-full object-cover" />
-                      : <RemoteVideo id={p.id} className="absolute inset-0 w-full h-full object-cover" />)}
-                    {p.hand && <span className="absolute -top-0.5 right-0.5 text-base drop-shadow">✋</span>}
-                  </div>
-                )}
-              </Chair>
-              {p && (
-                <span className="px-2 py-0.5 rounded-full bg-white/85 text-zinc-700 text-[11px] font-medium shadow flex items-center gap-1 whitespace-nowrap">
-                  {(isMe && !micOn) && <span title="Microfone desligado">🔇</span>}
-                  {p.name.split(' ')[0]}{isMe ? ' (você)' : ''}
-                </span>
-              )}
-            </div>
-          )
-        })}
+        {/* When sharing: dim the surroundings to spotlight the table + screen
+            (everything stays visible, just darker around the focus). */}
+        <div className="absolute inset-0 pointer-events-none transition-opacity duration-500"
+          style={{ opacity: sharer ? 1 : 0, background: 'radial-gradient(60% 74% at 50% 49%, transparent 48%, rgba(8,6,16,0.62) 100%)' }} />
       </div>
 
       {/* controls */}
