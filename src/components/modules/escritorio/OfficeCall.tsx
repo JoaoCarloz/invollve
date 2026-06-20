@@ -215,13 +215,16 @@ export function CallProvider({ session, children }: { session: UserSession; chil
   }
   async function toggleScreen() {
     setError('')
-    if (screenOn) { screenTrack.current?.stop(); screenTrack.current = null; setScreenOn(false); syncSenders() }
-    else {
+    if (screenOn) {
+      screenTrack.current?.stop(); screenTrack.current = null; setScreenOn(false); syncSenders()
+      post('/api/escritorio/screen', { sharing: false })
+    } else {
       try {
         const s = await (navigator.mediaDevices as any).getDisplayMedia({ video: true })
         const t = s.getVideoTracks()[0]
         screenTrack.current = t; setScreenOn(true); syncSenders()
-        t.onended = () => { screenTrack.current = null; setScreenOn(false); syncSenders() }
+        post('/api/escritorio/screen', { sharing: true })
+        t.onended = () => { screenTrack.current = null; setScreenOn(false); syncSenders(); post('/api/escritorio/screen', { sharing: false }) }
       } catch { setError('Compartilhamento de tela cancelado') }
     }
   }

@@ -1,5 +1,5 @@
 import { getSession } from '@/lib/session'
-import { subscribe, initialFrames } from '@/lib/officeHub'
+import { subscribe, initialFrames, touch } from '@/lib/officeHub'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -21,8 +21,11 @@ export async function GET() {
       }
       send(initialFrames())
       unsub = subscribe(session.id, send)
-      // keep-alive comment so proxies don't drop the idle connection
+      // keep-alive comment so proxies don't drop the idle connection; it also
+      // refreshes presence so an open tab stays "present" even if its JS heartbeat
+      // is throttled (backgrounded tab).
       ping = setInterval(() => {
+        touch(session.id)
         try { controller.enqueue(enc.encode(`: ping\n\n`)) } catch {}
       }, 15000)
     },
