@@ -40,9 +40,12 @@ const WALLS: Rect[] = [
   { x: MR.x + MR.w - WT, y: DOOR_Y + DOOR_H, w: WT, h: MR.y + MR.h - (DOOR_Y + DOOR_H) },
 ]
 const MT = { cx: MR.x + MR.w / 2, cy: MR.y + MR.h / 2 }
-const MEETING_SEATS = [
-  { x: MT.cx - 46, y: MT.cy - 30 }, { x: MT.cx, y: MT.cy - 30 }, { x: MT.cx + 46, y: MT.cy - 30 },
-  { x: MT.cx - 46, y: MT.cy + 30 }, { x: MT.cx, y: MT.cy + 30 }, { x: MT.cx + 46, y: MT.cy + 30 },
+// 8 chairs around the meeting table — index = meetingSeat (so the office shows
+// exactly who is sitting in the meeting room, in their assigned chair).
+const MEETING_SEATS: { x: number; y: number; facing: Facing }[] = [
+  { x: MT.cx - 50, y: MT.cy - 33, facing: 'down' }, { x: MT.cx, y: MT.cy - 33, facing: 'down' }, { x: MT.cx + 50, y: MT.cy - 33, facing: 'down' },
+  { x: MT.cx - 84, y: MT.cy, facing: 'right' }, { x: MT.cx + 84, y: MT.cy, facing: 'left' },
+  { x: MT.cx - 50, y: MT.cy + 33, facing: 'up' }, { x: MT.cx, y: MT.cy + 33, facing: 'up' }, { x: MT.cx + 50, y: MT.cy + 33, facing: 'up' },
 ]
 const DESKS = [
   { x: 300, y: 64 }, { x: 393, y: 64 }, { x: 486, y: 64 }, { x: 575, y: 64 },
@@ -195,19 +198,28 @@ export default function OfficeCanvas({ session, active = true, avatarColor }: { 
     drawMeetingTable(c)
 
     const now = Date.now()
-    // people seated at their fixed chairs (skip anyone away in the meeting room)
-    const people: { id: number; x: number; y: number; shirt: string; hair: string; name: string; status: Status; hand: boolean; me: boolean }[] = []
+    // People at their fixed chairs: office workers at their desk, and anyone in
+    // the meeting drawn seated around the meeting-room table (visible from outside).
+    const people: { id: number; x: number; y: number; facing: Facing; shirt: string; hair: string; name: string; status: Status; hand: boolean; me: boolean }[] = []
     othersRef.current.forEach(p => {
-      if (now - p.t > 12000 || p.meeting || p.seat < 0) return
-      const seat = OFFICE_SEATS[p.seat]; if (!seat) return
-      people.push({ id: p.id, x: seat.x, y: seat.y, shirt: p.avatarColor ?? ROLE_SHIRT[p.role] ?? '#7a8290', hair: ROLE_HAIR[p.role] ?? '#33312e', name: p.name.split(' ')[0], status: p.status, hand: !!p.hand, me: false })
+      if (now - p.t > 12000) return
+      const shirtCol = p.avatarColor ?? ROLE_SHIRT[p.role] ?? '#7a8290'
+      const hair = ROLE_HAIR[p.role] ?? '#33312e'
+      const name = p.name.split(' ')[0]
+      if (p.meeting) {
+        const ms = MEETING_SEATS[p.meetingSeat]; if (!ms) return
+        people.push({ id: p.id, x: ms.x, y: ms.y, facing: ms.facing, shirt: shirtCol, hair, name, status: 'reuniao', hand: !!p.hand, me: false })
+      } else {
+        const seat = OFFICE_SEATS[p.seat]; if (!seat) return
+        people.push({ id: p.id, x: seat.x, y: seat.y, facing: 'up', shirt: shirtCol, hair, name, status: p.status, hand: !!p.hand, me: false })
+      }
     })
     if (mySeat.current >= 0) {
       const mp = myPos()
-      people.push({ id: meId, x: mp.x, y: mp.y, shirt, hair: hairCol, name: firstName, status: active ? 'online' : 'ocupado', hand: false, me: true })
+      people.push({ id: meId, x: mp.x, y: mp.y, facing: 'up', shirt, hair: hairCol, name: firstName, status: active ? 'online' : 'ocupado', hand: false, me: true })
     }
     people.sort((a, b) => a.y - b.y) // simple depth order
-    people.forEach(p => drawPerson(c, p.x, p.y, p.shirt, p.hair, 'up'))
+    people.forEach(p => drawPerson(c, p.x, p.y, p.shirt, p.hair, p.facing))
 
     // walls on top (occlude avatars behind them)
     drawWalls(c)
@@ -222,9 +234,10 @@ export default function OfficeCanvas({ session, active = true, avatarColor }: { 
     c.textAlign = 'center'; c.font = '14px serif'
     people.forEach(p => { if (p.hand) c.fillText('✋', p.x + 16, p.y - 34) })
 
-    // meeting room label
+    // meeting room label (with live occupant count)
     c.font = '600 10px ui-sans-serif, system-ui, sans-serif'; c.textAlign = 'center'
-    const lbl = 'Sala de reunião'
+    const mtgCount = othersRef.current.filter(p => now - p.t < 12000 && p.meeting).length
+    const lbl = mtgCount > 0 ? `Sala de reunião · ${mtgCount}` : 'Sala de reunião'
     const lw = c.measureText(lbl).width + 16
     fillRR(c, MR.x + MR.w / 2 - lw / 2, MR.y + 10, lw, 17, 8, 'rgba(51,65,79,0.9)')
     c.fillStyle = '#fff'; c.fillText(lbl, MR.x + MR.w / 2, MR.y + 22)
