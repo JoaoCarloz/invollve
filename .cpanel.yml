@@ -1,0 +1,9 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/invollvecom/invollve
+    - /bin/cp -rf /home/invollvecom/invollve_deploy/.next $DEPLOYPATH/
+    - /bin/cp -rf /home/invollvecom/invollve_deploy/public $DEPLOYPATH/
+    - /bin/cp -rf /home/invollvecom/invollve_deploy/src $DEPLOYPATH/
+    - /bin/cp -f /home/invollvecom/invollve_deploy/package.json $DEPLOYPATH/
+    - touch $DEPLOYPATH/tmp/restart.txt
