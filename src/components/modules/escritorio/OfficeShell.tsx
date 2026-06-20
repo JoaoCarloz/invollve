@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { UserSession } from '@/lib/auth'
 import OfficeCanvas from './OfficeCanvas'
 import MeetingRoom from './MeetingRoom'
-import { CallProvider, CallControls } from './OfficeCall'
+import { CallProvider } from './OfficeCall'
 import AvatarSelect, { shouldShowAvatarSelect, getAvatarColor } from './AvatarSelect'
 
 const OFFICE_PATH = '/dashboard/escritorio'
@@ -131,18 +131,15 @@ export default function OfficeShell({ session, children }: { session: UserSessio
             {/* Avatar selection overlay (once per session) */}
             {showSelect && <AvatarSelect session={session} onEnter={handleEnter} />}
 
-            {/* Office control dock (voice + raise hand + enter meeting) */}
-            {!showSelect && (
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30">
-                <CallControls
-                  variant="office"
-                  extra={
-                    <button onClick={enterMeeting} title="Entrar na reunião"
-                      className="ml-1 h-11 px-4 rounded-full flex items-center gap-1.5 bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold transition-all">
-                      📹 Entrar na reunião
-                    </button>
-                  }
-                />
+            {/* Enter-meeting button — shown only in the office area itself. No mic /
+                raise-hand here: people only talk once inside the meeting room. */}
+            {!showSelect && !overlayOpen && (
+              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-30">
+                <button onClick={enterMeeting} title="Entrar na reunião"
+                  className="h-11 px-5 rounded-full flex items-center gap-2 text-white text-sm font-semibold shadow-xl transition-all hover:brightness-110 active:scale-95"
+                  style={{ background: 'var(--grad)' }}>
+                  📹 Entrar na reunião
+                </button>
               </div>
             )}
           </>

@@ -55,7 +55,9 @@ export default function Sidebar({ session }: { session: UserSession }) {
       {/* Header */}
       <div className="h-14 px-3 border-b border-[var(--border)] flex items-center justify-between gap-2 flex-shrink-0">
         {!collapsed
-          ? <img src="/logo.png" alt="Invollve" className="h-7 object-contain" style={{ filter: 'brightness(0) invert(1)', opacity: 0.95 }} />
+          ? <div className="rounded-xl px-3 py-1.5 shadow-sm" style={{ background: 'var(--brand-light)' }}>
+              <img src="/logo.png" alt="Invollve" className="h-6 object-contain" />
+            </div>
           : <div className="w-9 h-9 mx-auto rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'var(--grad)' }}>
               <span className="text-white text-sm font-black">I</span>
             </div>}
