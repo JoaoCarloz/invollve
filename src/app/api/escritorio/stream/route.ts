@@ -1,5 +1,5 @@
 import { getSession } from '@/lib/session'
-import { subscribe, remove, initialFrames } from '@/lib/officeHub'
+import { subscribe, initialFrames } from '@/lib/officeHub'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -29,7 +29,12 @@ export async function GET() {
     cancel() {
       clearInterval(ping)
       unsub()
-      remove(session.id) // drop presence when the tab closes
+      // NOTE: we intentionally do NOT remove presence here. A user holds several
+      // SSE connections at once (voice + the office/meeting view), and switching
+      // views closes one of them — removing on any close would wipe the user's
+      // seat and meeting membership mid-session. Presence is kept alive by the
+      // 3s heartbeat (POST /move) and pruned automatically after STALE_MS once a
+      // tab really closes and the heartbeat stops.
     },
   })
 
