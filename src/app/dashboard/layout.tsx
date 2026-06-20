@@ -9,7 +9,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (session.role === 'cliente') redirect('/portal')
 
   return (
-    <div className="flex h-screen bg-[#0f0f13] overflow-hidden">
+    <div className="app-bg flex h-screen overflow-hidden">
       <Sidebar session={session} />
       <OfficeShell session={session}>{children}</OfficeShell>
     </div>

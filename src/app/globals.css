@@ -1,23 +1,109 @@
 @import "tailwindcss";
 
+/*
+ * Invollve design system — "dark premium".
+ * Built on the brand palette: deep purple #25005B, purple #4505A0,
+ * orange #FF5B0F, pink #FF2161, light #F5F5F5, gradient orange→pink.
+ */
 :root {
-  --background: #0f0f13;
-  --foreground: #f0f0f5;
+  /* brand */
+  --brand-deep:   #25005B;
+  --brand-purple: #4505A0;
+  --brand-orange: #FF5B0F;
+  --brand-pink:   #FF2161;
+  --brand-light:  #F5F5F5;
+
+  /* gradients */
+  --grad:      linear-gradient(100deg, #FF5B0F 0%, #FF2161 100%);
+  --grad-455:  linear-gradient(135deg, #FF5B0F 0%, #FF2161 100%);
+  --grad-soft: linear-gradient(100deg, rgba(255,91,15,0.18), rgba(255,33,97,0.18));
+
+  /* semantic (refined dark, tinted toward the deep brand purple) */
+  --bg:        #0a0613;
+  --surface:   rgba(255,255,255,0.038);
+  --surface-2: rgba(255,255,255,0.065);
+  --border:    rgba(255,255,255,0.08);
+  --border-2:  rgba(157,123,255,0.22);
+  --fg:        #f3f0f8;
+  --muted:     #9a8fb1;
+  --accent:    #9d7bff;   /* readable lightened purple for text/active on dark */
+
+  /* keep old variable names working */
+  --background: var(--bg);
+  --foreground: var(--fg);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-brand-deep: var(--brand-deep);
+  --color-brand-purple: var(--brand-purple);
+  --color-brand-orange: var(--brand-orange);
+  --color-brand-pink: var(--brand-pink);
+  --color-accent: var(--accent);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-.glass {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  backdrop-filter: blur(12px);
+/* premium app background: deep base with soft brand glows in the corners */
+.app-bg {
+  background:
+    radial-gradient(1100px 560px at 10% -14%, rgba(69,5,160,0.30), transparent 60%),
+    radial-gradient(820px 460px at 108% -8%, rgba(255,33,97,0.12), transparent 55%),
+    radial-gradient(760px 620px at 50% 128%, rgba(255,91,15,0.07), transparent 60%),
+    var(--bg);
+}
+
+/* premium surface — also upgrades every existing `.glass` card automatically */
+.glass,
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 14px 38px -20px rgba(0,0,0,0.8);
+  backdrop-filter: blur(14px);
+}
+.card-hover { transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease; }
+.card-hover:hover {
+  border-color: var(--border-2);
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 20px 48px -22px rgba(0,0,0,0.85);
+}
+
+/* brand helpers */
+.gradient-text {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.btn-primary {
+  background: var(--grad);
+  color: #fff;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 24px -10px rgba(255,33,97,0.6);
+  transition: filter .15s ease, transform .15s ease;
+}
+.btn-primary:hover { filter: brightness(1.07); }
+.btn-primary:active { transform: scale(0.98); }
+
+/* refined scrollbars */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.10);
+  border-radius: 9px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(157,123,255,0.40);
+  background-clip: padding-box;
 }

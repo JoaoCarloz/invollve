@@ -93,7 +93,7 @@ export default function OfficeShell({ session, children }: { session: UserSessio
 
   return (
     <CallProvider session={session}>
-      <div className="relative flex-1 h-screen overflow-hidden bg-[#08080c]">
+      <div className="relative flex-1 h-screen overflow-hidden">
         {inMeeting ? (
           <MeetingRoom session={session} avatarColor={avatarColor} onLeave={leaveMeeting} />
         ) : (
@@ -107,21 +107,18 @@ export default function OfficeShell({ session, children }: { session: UserSessio
             {overlayOpen && (
               <div className="absolute inset-0 z-20 flex items-center justify-center p-3 sm:p-6" onClick={closeWindow}>
                 <div
-                  className="flex flex-col w-full h-full max-w-[1400px] rounded-2xl border border-white/10 bg-[#0f0f13] shadow-2xl overflow-hidden"
+                  className="flex flex-col w-full h-full max-w-[1400px] rounded-2xl border border-[var(--border-2)] shadow-2xl overflow-hidden backdrop-blur-xl"
+                  style={{ background: 'linear-gradient(180deg, rgba(20,12,38,0.96), rgba(10,6,19,0.96))' }}
                   onClick={e => e.stopPropagation()}
                 >
-                  <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-white/5 bg-[#0a0a0e] flex-shrink-0">
-                    <div className="flex items-center gap-2">
-                      <span className="flex gap-1.5">
-                        <span className="w-3 h-3 rounded-full bg-red-500/80" />
-                        <span className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                        <span className="w-3 h-3 rounded-full bg-green-500/80" />
-                      </span>
-                      <span className="ml-2 text-sm font-semibold text-white">{titleFor(pathname)}</span>
+                  <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-[var(--border)] bg-white/[0.02] flex-shrink-0">
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--grad)' }} />
+                      <span className="text-sm font-semibold text-white">{titleFor(pathname)}</span>
                     </div>
                     <button
                       onClick={closeWindow}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-300 hover:text-white bg-white/5 hover:bg-white/10 transition-all"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--muted)] hover:text-white bg-white/[0.04] hover:bg-white/[0.09] border border-[var(--border)] transition-all"
                     >
                       🏢 Voltar ao escritório
                     </button>

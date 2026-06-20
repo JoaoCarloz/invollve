@@ -37,16 +37,19 @@ export default function Sidebar({ session }: { session: UserSession }) {
     item.module === null || PERMISSIONS[item.module]?.includes(session.role)
   )
 
+  const initials = session.name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
+
   return (
-    <aside className={`flex flex-col border-r border-white/5 bg-[#0a0a0e] transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}>
+    <aside className={`relative flex flex-col border-r border-[var(--border)] transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}
+      style={{ background: 'linear-gradient(180deg, #150c2a 0%, #0b0716 100%)' }}>
       {/* Header */}
-      <div className="p-3 border-b border-white/5 flex items-center justify-between gap-2">
+      <div className="p-3 border-b border-[var(--border)] flex items-center justify-between gap-2">
         {!collapsed && (
           <img src="/logo.png" alt="Invollve" className="h-7 object-contain" />
         )}
         {collapsed && (
-          <div className="w-8 h-8 mx-auto rounded-lg flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #6c3de8, #ec4899)' }}>
+          <div className="w-8 h-8 mx-auto rounded-lg flex items-center justify-center shadow-lg"
+            style={{ background: 'var(--grad)' }}>
             <span className="text-white text-xs font-black">I</span>
           </div>
         )}
@@ -73,10 +76,12 @@ export default function Sidebar({ session }: { session: UserSession }) {
           const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
           return (
             <Link key={item.href} href={item.href} title={collapsed ? item.label : undefined}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${collapsed ? 'justify-center' : ''} ${active
-                ? 'bg-purple-600/20 text-purple-300 font-medium'
-                : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`}>
-              <span className="text-base flex-shrink-0">{item.icon}</span>
+              className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${collapsed ? 'justify-center' : ''} ${active
+                ? 'text-white font-medium'
+                : 'text-[var(--muted)] hover:text-white hover:bg-white/[0.05]'}`}
+              style={active ? { background: 'var(--grad-soft)' } : undefined}>
+              {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full" style={{ background: 'var(--grad)' }} />}
+              <span className={`text-base flex-shrink-0 transition-transform ${active ? 'scale-110' : 'group-hover:scale-105 opacity-80 group-hover:opacity-100'}`}>{item.icon}</span>
               {!collapsed && <span>{item.label}</span>}
             </Link>
           )
@@ -84,16 +89,20 @@ export default function Sidebar({ session }: { session: UserSession }) {
       </nav>
 
       {/* Footer */}
-      <div className="p-2 border-t border-white/5">
-        {!collapsed && (
-          <div className="px-3 py-2 mb-1">
-            <p className="text-sm font-medium text-white truncate">{session.name}</p>
-            <p className="text-xs text-zinc-500 truncate">{session.email}</p>
-          </div>
-        )}
+      <div className="p-2 border-t border-[var(--border)]">
+        <div className={`flex items-center gap-2.5 px-2 py-2 mb-1 ${collapsed ? 'justify-center' : ''}`}>
+          <div className="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center text-white text-[11px] font-bold shadow-md ring-2 ring-white/10"
+            style={{ background: 'var(--grad)' }}>{initials}</div>
+          {!collapsed && (
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-white truncate leading-tight">{session.name}</p>
+              <p className="text-xs text-[var(--muted)] truncate">{session.email}</p>
+            </div>
+          )}
+        </div>
         <button onClick={logout} title={collapsed ? 'Sair' : undefined}
-          className={`w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-zinc-400 hover:bg-white/5 hover:text-white transition-all ${collapsed ? 'justify-center' : ''}`}>
-          <span className="flex-shrink-0">🚪</span>
+          className={`w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[var(--muted)] hover:bg-white/[0.05] hover:text-white transition-all ${collapsed ? 'justify-center' : ''}`}>
+          <span className="flex-shrink-0 opacity-80">🚪</span>
           {!collapsed && <span>Sair</span>}
         </button>
       </div>
